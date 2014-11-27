@@ -1,63 +1,124 @@
+---
+layout: post
+title:  "GitLab 流程"
+category : 技术
+tagline: "一套定义的最佳实践"
+tags : [GitLab, Git]
+---
+
+
 ![GitLab Flow](gitlab_flow.png)
 
-# Introduction
+# 翻译对照
+GitLab Flow：GitLab 流程
+feature driven development：特征驱动开发
+commit：提交
+staging area：暂存区
+master branch：主分支
+continuous delivery：持续交付
+ceremony：典礼
+hotfix：补丁
+rebase：衍合
 
+# 引言 Introduction
+
+使用 Git 进行版本管理使得分支与合并比其它的版本系统（比如 SVN）更加容易。
 Version management with git makes branching and merging much easier than older versioning systems such as SVN.
+这允许多种多样的分支策略与工作流程。
 This allows a wide variety of branching strategies and workflows.
+几乎所有这些都是 Git 之前使用方法的一种改进。
 Almost all of these are an improvement over the methods used before git.
+但是，许多组织以一个没有清晰定义的、极度复杂的或者没有与问题跟踪系统集成的工作流程而告终。
 But many organizations end up with a workflow that is not clearly defined, overly complex or not integrated with issue tracking systems.
+因此，我们计划把 GitLab 流程作为一套清晰定义的最佳实践。
 Therefore we propose the GitLab flow as clearly defined set of best practices.
+它结合[特征驱动开发](http://en.wikipedia.org/wiki/Feature-driven_development)、[特征分支](http://martinfowler.com/bliki/FeatureBranch.html)与问题跟踪。
 It combines [feature driven development](http://en.wikipedia.org/wiki/Feature-driven_development) and [feature branches](http://martinfowler.com/bliki/FeatureBranch.html) with issue tracking.
 
+从其它版本控制系统转到 Git 的组织经常发现很难开发出一个有效的工作流程。
 Organizations coming to git from other version control systems frequently find it hard to develop an effective workflow.
+这篇文章描述 GitLab 流程——结合 GitLab 流程与一个问题跟踪系统。
 This article describes the GitLab flow that integrates the git workflow with an issue tracking system.
+它提供一个使用 Git 工作的简单、易懂、有效的方法。
 It offers a simple, transparent and effective way to work with git.
 
-![Four stages (working copy, index, local repo, remote repo) and three steps between them](four_stages.png)
+![四个阶段（工作副本、索引、本地仓库、远程仓库）与它们之间的三个步骤](four_stages.png)
 
+当转变到 Git，你必需习惯于这样的事实——在一个提交与同事共享之前有三个步骤。
 When converting to git you have to get used to the fact that there are three steps before a commit is shared with colleagues.
+许多版本控制系统只有一个步骤——从工作副本提交到共享服务器。
 Most version control systems have only step, committing from the working copy to a shared server.
+
+在 Git 中，你从工作副本中添加文件到暂存区。然后，你提交它们到本地仓库。
 In git you add files from the working copy to the staging area. After that you commit them to the local repo.
+第三个步骤是推送到一个共享的远程仓库。
 The third step is pushing to a shared remote repository.
+使用这三个步骤后，分支模型变成挑战。
 After getting used to these three steps the branching model becomes the challenge.
 
-![Multiple long running branches and merging in all directions](messy_flow.png)
+![多个长久运作的分支与全方向的合并](messy_flow.png)
 
+由于许多刚开始使用 Git 的组织没有如何使用它工作的约定，很容易变成一团糟。
 Since many organizations new to git have no conventions how to work with it, it can quickly become a mess.
+它们遭遇的最大问题是：周围是每个包含一部分变更的许多个长久运作的分支。
 The biggest problem they run into is that many long running branches that each contain part of the changes are around.
+人们很难区分哪个分支是他们要开发的或者是部署到产品的。
 People have a hard time figuring out which branch they should develop on or deploy to production.
+经常反应这个问题的是采用如 [Git 流程](http://nvie.com/posts/a-successful-git-branching-model/)与 [GitHub 流程](http://scottchacon.com/2011/08/31/github-flow.html)的标准模式。
 Frequently the reaction to this problem is to adopt a standardized pattern such as [git flow](http://nvie.com/posts/a-successful-git-branching-model/) and [GitHub flow](http://scottchacon.com/2011/08/31/github-flow.html)
+我们认为仍有改进的余地，并详细介绍一套我们称为 GitLab 流程的实践。
 We think there is still room for improvement and will detail a set of practices we call GitLab flow.
 
-# Git flow and its problems
+# Git 流程与它的问题 Git flow and its problems
 
-[![Git Flow timeline by Vincent Driessen, used with persmission](gitdashflow.png)
+[![经 Vincent Driessen 许可使用的 Git 流程时间轴](gitdashflow.png)
 
+Git 流程是使用 Git 分支的首批建议书中的一个，并且它已经受到很多的关注。
 Git flow was one of the first proposals to use git branches and it has gotten a lot of attention.
+它提倡一个主分支与一个单独的开发分支，以及特征、发布与补丁的许多次要分支。
 It advocates a master branch and a separate develop branch as well as supporting branches for features, releases and hotfixes.
+开发产生在开发分支上，移动到一个发布分支上，最后合并到主分支。
 The development happens on the develop branch, moves to a release branch and is finally merged into the master branch.
+Git 流程是一个明确定义的标准，但是它的复杂性引入两个问题。
 Git flow is a well defined standard but its complexity introduces two problems.
+第一个问题是：开发人员必需使用开发分支，而不是主分支，主分支预留给已发布到产品的代码。
 The first problem is that developers must use the develop branch and not master, master is reserved for code that is released to production.
+有个惯例：称呼你的默认分支为主分支，通常从这分支，并且合并到这。
 It is a convention to call your default branch master and to mostly branch from and merge to this.
+因此，大部分工具自动把主分支当做默认分支，并且默认显示这个分支，切换到别的分支是令人讨厌的。
 Since most tools automatically make the master branch the default one and display that one by default it is annoying to have to switch to another one.
+Git 流程的第二个问题时：引入补丁与发布分支的复杂性。
 The second problem of git flow is the complexity introduced by the hotfix and release branches.
+这些分支对某些组织来说是个好主意，但是对绝大多数来说是多样的。
 These branches can be a good idea for some organizations but are overkill for the vast majority of them.
+现在大部分组织实施持续交付，意味着你的默认分支可以部署。
 Nowadays most organizations practice continuous delivery which means that your default branch can be deployed.
+这意味着已修复的与发布分支可以避免包含所有它们引入的典礼。
 This means that hotfixed and release branches can be prevented including all the ceremony they introduce.
+一个这样典礼的例子：从发布分支合并回来。
 An example of this ceremony is the merging back of release branches.
+虽然确实有可以解决这个问题的特定工具，但是它们需要文档说明与增加复杂性。
 Though specialized tools do exist to solve this, they require documentation and add complexity.
+通常，开发人员会犯错误，例如：变更只合并到主分支而没有合并到开发分支。
 Frequently developers make a mistake and for example changes are only merged into master and not into the develop branch.
+出现这样错误的根源是对大多数情况下 Git 流程太复杂了。
 The root cause of these errors is that git flow is too complex for most of the use cases.
+并且发布没有意味着也自动完成补丁。
 And doing releases doesn't automatically mean also doing hotfixes.
 
-# GitHub flow as a simpler alternative
+# GitHub 流程像一个更简单的替代品 GitHub flow as a simpler alternative
 
-![Master branch with feature branches merged in](github_flow.png)
+![主分支包含已合并的特征分支](github_flow.png)
 
- In reaction to git flow a simpler alternative was detailed, [GitHub flow](https://guides.github.com/introduction/flow/index.html).
+对比 Git 流程，详细说明一个更简单的替代品，[GitHub 流程](https://guides.github.com/introduction/flow/index.html)。
+In reaction to git flow a simpler alternative was detailed, [GitHub Flow](https://guides.github.com/introduction/flow/index.html).
+该流程只有特征分支与一个主分支。
 This flow has only feature branches and a master branch.
+这流程非常简单与清晰，许多组织已经采用它并取得很大的成功。
 This is very simple and clean, many organizations have adopted it with great success.
+Atlassian 推荐[一个相似的策略](http://blogs.atlassian.com/2014/01/simple-git-workflow-simple/)，虽然他们衍合特征分支。
 Atlassian recommends [a similar strategy](http://blogs.atlassian.com/2014/01/simple-git-workflow-simple/) although they rebase feature branches.
+合并所有东西到主分支并部署，经常意味着减少代码的数量
 Merging everything into the master branch and deploying often means you minimize the amount of code in 'inventory' which is in line with the lean and continuous delivery best practices.
 But this flow still leaves a lot of questions unanswered regarding deployments, environments, releases and integrations with issues.
 With GitLab flow we offer additional guidance for these questions.
