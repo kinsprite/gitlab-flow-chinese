@@ -19,6 +19,10 @@ continuous delivery：持续交付
 ceremony：典礼
 hotfix：补丁
 rebase：衍合
+inventory：清单
+release：发布
+issues：问题
+Production branch：产品分支
 
 # 引言 Introduction
 
@@ -118,25 +122,38 @@ This flow has only feature branches and a master branch.
 This is very simple and clean, many organizations have adopted it with great success.
 Atlassian 推荐[一个相似的策略](http://blogs.atlassian.com/2014/01/simple-git-workflow-simple/)，虽然他们衍合特征分支。
 Atlassian recommends [a similar strategy](http://blogs.atlassian.com/2014/01/simple-git-workflow-simple/) although they rebase feature branches.
-合并所有东西到主分支并部署，经常意味着减少代码的数量
+合并所有东西到主分支并部署，经常意味着减少精益求精“清单”中的代码量与持续交付最佳实践。
 Merging everything into the master branch and deploying often means you minimize the amount of code in 'inventory' which is in line with the lean and continuous delivery best practices.
+但是，该流程仍留下很多关于部署、环境、发布与问题集成的问题未回答。
 But this flow still leaves a lot of questions unanswered regarding deployments, environments, releases and integrations with issues.
+通过 GitLab 流程，我们提供这些问题的额外指导。
 With GitLab flow we offer additional guidance for these questions.
 
-# Production branch with GitLab flow
+# GitLab 流程的产品分支 Production branch with GitLab flow
 
-![Master branch and production branch with arrow that indicate deployments](production_branch.png)
+![主分支与箭头指示部署的产品分支](production_branch.png)
 
+GitHub 流程确实假定每次你合并一个特征分支时你可以部署到产品。
 GitHub flow does assume you are able to deploy to production every time you merge a feature branch.
+这适合给软件即服务（Saas）的应用，但是这不适合很多种情况。
 This is possible for SaaS applications but are many cases where this is not possible.
+其中一种情况是当你没法控制确切的发布时刻，例如一个 iOS 应用需要通过应用商店的验证。
 One would be a situation where you are not in control of the exact release moment, for example an iOS application that needs to pass AppStore validation.
+另一个例子是你有部署窗口（运作团队全负荷工作、上午10点到下午4点的工作日），但是你也在其它时间内合并代码。
 Another example is when you have deployment windows (workdays from 10am to 4pm when the operations team is at full capacity) but you also merge code at other times.
+在这些情况下，你可以使得产品分支反映已部署的代码。
 In these cases you can make a production branch that reflects the deployed code.
+你可以部署一个合并到主分支的新版本到产品分支。
 You can deploy a new version by merging in master to the production branch.
+如果你需要知道哪些代码在产品中，你只需签出产品分支来看。
 If you need to know what code is in production you can just checkout the production branch to see.
+作为版本控制系统中的合并提交，近似的部署时间很容易看到。
 The approximate time of deployment is easily visible as the merge commit in the version control system.
+如果你自动部署你的产品分支，这个时间相当精确。
 This time is pretty accurate if you automatically deploy your production branch.
+如果你需要更精确的时间，你可以在每次部署时使用你的部署代码创建一个标签。
 If you need a more exact time you can have your deployment script create a tag on each deployment.
+这个流程避免过度的发布、打标签与合并—— Git 流程中通常使用。
 This flow prevents the overhead of releasing, tagging and merging that is common to git flow.
 
 # Environment branches with GitLab flow
