@@ -22,7 +22,7 @@ rebase：衍合
 inventory：清单
 release：发布
 issues：问题
-Production branch：产品分支
+Production branch：产品分支、生产分支
 
 # 引言 Introduction
 
@@ -156,24 +156,34 @@ If you need a more exact time you can have your deployment script create a tag o
 这个流程避免过度的发布、打标签与合并—— Git 流程中通常使用。
 This flow prevents the overhead of releasing, tagging and merging that is common to git flow.
 
-# Environment branches with GitLab flow
+# GitLab 流程的环境分支 Environment branches with GitLab flow
 
-![Multiple branches with the code cascading from one to another](environment_branches.png)
+![从一个到另一个代码级联的多重分支](environment_branches.png)
 
+有个环境自动更新到主分支可能是个好主意。
 It might be a good idea to have an environment that is automatically updated to the master branch.
+只有在这种情况下，这个环境名可能与分支名不同。
 Only in this case, the name of this environment might differ from the branch name.
+假设你有一个临时环境、一个预生产环境与一个生产环境。
 Suppose you have a staging environment, a pre-production environment and a production environment.
+在这种情况下，主分支部署在临时环境。当有人想要部署到预生产环境，他们从主分支创建一个合并请求到预生产分支。
 In this case the master branch is deployed on staging. When someone wants to deploy to pre-production they create a merge request from the master branch to the pre-production branch.
+然后继续通过合并预生产分支到生产分支来代码生产。
 And going live with code happens by merging the pre-production branch into the production branch.
+这个提交只能向下流动的工作流程确保任何东西已在所有环境中测试。
 This workflow where commits only flow downstream ensures that everything has been tested on all environments.
+如果你需要择优选择一个含补丁的提交，它通常在一个特征分支上开发，然后通过一个合并请求合并到主分支中，不删除特征分支。
 If you need to cherry-pick a commit with a hotfix it is common to develop it on a feature branch and merge it into master with a merge request, do not delete the feature branch.
+如果主分支准备好了（如果你是实践[持续交付](http://martinfowler.com/bliki/ContinuousDelivery.html)，它应该是好的），然后合并它到其它分支。
 If master is good to go (it should be if you a practicing [continuous delivery](http://martinfowler.com/bliki/ContinuousDelivery.html)) you then merge it to the other branches.
+如果是因为需要更多的手动测试而不可能，你可以从特征分支发送合并请求到下游分支。
 If this is not possible because more manual testing is required you can send merge requests from the feature branch to the downstream branches.
+一个环境分支的“极端”版本可以由 [Teatro](http://teatro.io/) 给每个特征分支设置一个环境。
 An 'extreme' version of environment branches are setting up an environment for each feature branch as done by [Teatro](http://teatro.io/).
 
-# Release branches with GitLab flow
+# GitLab 流程的发布分支 Release branches with GitLab flow
 
-![Master and multiple release branches that vary in length with cherrypicks from master](release_branches.png)
+![主分支与从主分支择优选择不同长度的多重发布分支](release_branches.png)
 
 Only in case you need to release software to the outside world you need to work with release branches.
 In this case, each branch contains a minor version (2-3-stable, 2-4-stable, etc.).
