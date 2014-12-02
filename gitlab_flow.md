@@ -22,7 +22,9 @@ rebase：衍合
 inventory：清单
 release：发布
 issues：问题
-Production branch：产品分支、生产分支
+production branch：产品分支、生产分支
+stable branch：稳定分支
+issue：问题
 
 # 引言 Introduction
 
@@ -185,54 +187,89 @@ An 'extreme' version of environment branches are setting up an environment for e
 
 ![主分支与从主分支择优选择不同长度的多重发布分支](release_branches.png)
 
+只有在你需要发布软件到外部世界的情况下，你才需要用发布分支来工作。
 Only in case you need to release software to the outside world you need to work with release branches.
+在这种情况下，每个分支包含一个次版本号（2-3-stable、2-4-stable、等等）。
 In this case, each branch contains a minor version (2-3-stable, 2-4-stable, etc.).
+稳定分支使用主分支作为起始点，并且尽可能晚地创建。
 The stable branch uses master as a starting point and is created as late as possible.
+通过尽可能晚地分支，你花费最少的时间来给多个分支应用错误修正。
 By branching as late as possible you minimize the time you have to apply bugfixes to multiple branches.
+一个发布分支宣布以后，只有严重的错误修正才会包含在发布分支中。
 After a release branch is announced, only serious bug fixes are included in the release branch.
+如果可能的话，这些错误修正先合并到主分支，再择优选择它们到发布分支。
 If possible these bug fixes are first merged into master and then cherry-picked into the release branch.
+这样，你不会忘记优选择它们到主分支，也不会在随后的发布中遭遇同一的bug。
 This way you can't forget to cherry-pick them into master and encounter the same bug on subsequent releases.
+这称为一种“上游优先”的策略，同样也被 [Google](http://www.chromium.org/chromium-os/chromiumos-design-docs/upstream-first) and [Red Hat](http://www.redhat.com/about/news/archive/2013/5/a-community-for-using-openstack-with-red-hat-rdo) 实践。
 This is called an 'upstream first' policy that is also practiced by [Google](http://www.chromium.org/chromium-os/chromiumos-design-docs/upstream-first) and [Red Hat](http://www.redhat.com/about/news/archive/2013/5/a-community-for-using-openstack-with-red-hat-rdo).
+每次一个错误修正被包含到一个发布分支，通过设置一个标签来上升补丁版本号（遵从 [Semantic 版本命名](http://semver.org/)）。
 Every time a bug-fix is included in a release branch the patch version is raised (to comply with [Semantic Versioning](http://semver.org/)) by setting a new tag.
+一些项目也有一个指向同样提交的稳定分支作为最新发布分支。
 Some projects also have a stable branch that points to the same commit as the latest released branch.
+在这种流程中，通常不会有一个产品分支（或者 Git 流程的主分支）。
 In this flow it is not common to have a production branch (or git flow master branch).
 
-# Merge/pull requests with GitLab flow
+# GitLab 流程的合并/拉取请求 Merge/pull requests with GitLab flow
 
-![Merge request with line comments](mr_inline_comments.png)
+![行注释的合并请求](mr_inline_comments.png)
 
+在 Git 管理应用中创建合并或者拉取请求，然后邀请一位指派的人合并两个分支。
 Merge or pull requests are created in a git management application and ask an assigned person to merge two branches.
+因第一个手动操作应当为拉取特征分支，诸如 GitHub 与 Bitbucket 的工具选择拉取作为名称。
 Tools such as GitHub and Bitbucket choose the name pull request since the first manual action would be to pull the feature branch.
+因合并为请求代理人的最后一个操作，诸如 GitLab 与 Gitorious 的工具选择合并请求作为名称。
 Tools such as GitLab and Gitorious choose the name merge request since that is the final action that is requested of the assignee.
+在本文中，我们将称它们为合并请求。
 In this article we'll refer to them as merge requests.
 
+如果你在一个特征分支上工作超过几个小时，最好跟团队的其他成员分享中间结果。
 If you work on a feature branch for more than a few hours it is good to share the intermediate result with the rest of the team.
+通过创建一个没有指派给任何人的合并请求来达成这个目标，而不是在描述或者评论中提到某人（/cc @mark @susan）。
 This can be done by creating a merge request without assigning it to anyone, instead you mention people in the description or a comment (/cc @mark @susan).
+这意味着它未准备好合并，但是反馈是欢迎的。
 This means it is not ready to be merged but feedback is welcome.
+你的团队成员可以在大体的合并请求上或者行注释的特定行上评论。
 Your team members can comment on the merge request in general or on specific lines with line comments.
+合并请求可以作为代码审查工具使用，而不需要诸如 Gerrit 与 reviewboard 的单独工具。
 The merge requests serves as a code review tool and no separate tools such as Gerrit and reviewboard should be needed.
+如果审查揭露缺点，任何人可以提交与推送一个修正。
 If the review reveals shortcomings anyone can commit and push a fix.
+通常干这个活的是创建合并/拉取请求的那个人。
 Commonly the person to do this is the creator of the merge/pull request.
+当一个新的提交被推送到该分支上，合并/拉取请求中的差异将自动更新。
 The diff in the merge/pull requests automatically updates when new commits are pushed on the branch.
 
+当你感觉它适合合并时，你指派它给一位最知道你已更改代码库的人，并且提到你想要反馈的其他人。
 When you feel comfortable with it to be merged you assign it to the person that knows most about the codebase you are changing and mention any other people you would like feedback from.
+那有更多的反馈空间，随后指派的那位觉得结果分支适合合并。
 There is room for more feedback and after the assigned person feels comfortable with the result the branch is merged.
+如果指派的人们觉得不合适，他们可以没有合并就关闭合并请求。
 If the assigned person does not feel comfortable they can close the merge request without merging.
 
+在 GitLab 中，通常保护生命周期长的分支（例如：主分支），因此，普通开发人员[不能修改这些已保护的分支](https://gitlab.com/gitlab-org/gitlab-ce/blob/master/doc/permissions/permissions.md)。
 In GitLab it is common to protect the long-lived branches (e.g. the master branch) so that normal developers [can't modify these protected branches](https://gitlab.com/gitlab-org/gitlab-ce/blob/master/doc/permissions/permissions.md).
+所以，如果你想合并它到一个已保护的分支，你指派它给 master 授权的某人。
 So if you want to merge it into a protected branch you assign it to someone with master authorizations.
 
-# Issues with GitLab flow
+# GitLab 流程的问题跟踪 Issues with GitLab flow
 
-![Merge request with the branch name 15-require-a-password-to-change-it and assignee field shown](merge_request.png)
+![分支名为 15-require-a-password-to-change-it 的合并请求与指派人字段显示](merge_request.png)
 
+GitLab 流程是一个使得代码与问题跟踪关联更透明的方法。
 GitLab flow is a way to make the relation between the code and the issue tracker more transparent.
 
+任何重大的代码更改应该以一个描述目的的问题开始。
 Any significant change to the code should start with an issue where the goal is described.
+对通知团队中每个成员与帮助人们保持特征分支的范围小，有每次代码更改的理由是重要的。
 Having a reason for every code change is important to inform everyone on the team and to help people keep the scope of a feature branch small.
+在 GitLab 中，每次代码库的更改从问题跟踪系统的一个问题开始。
 In GitLab each change to the codebase starts with an issue in the issue tracking system.
+假如有重大的工作（大于 1 个小时）将卷入，如果还没有问题，应该先创建它。
 If there is no issue yet it should be created first provided there is significant work involved (more than 1 hour).
+对于很多组织，因为问题必须将作为冲刺阶段的评估，自然这样做。
 For many organizations this will be natural since the issue will have to be estimated for the sprint.
+问题的标题应该描述系统的状态，例如，“作为管理员，我想没有收到错误地移除用户。”代替“管理员无法移除用户。”。
 Issue titles should describe the desired state of the system, e.g. "As an administrator I want to remove users without receiving an error" instead of "Admin can't remove users.".
 
 When you are ready to code you start a branch for the issue from the master branch.
