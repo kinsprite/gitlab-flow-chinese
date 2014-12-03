@@ -22,9 +22,13 @@ rebase：衍合
 inventory：清单
 release：发布
 issues：问题
-production branch：产品分支、生产分支
+production branch：生产分支
 stable branch：稳定分支
+staging environment：准生产环境
+pre-production environment：预生产环境
+production environment：生产环境
 issue：问题
+repository：仓库
 
 # 引言 Introduction
 
@@ -68,7 +72,7 @@ After getting used to these three steps the branching model becomes the challeng
 Since many organizations new to git have no conventions how to work with it, it can quickly become a mess.
 它们遭遇的最大问题是：周围是每个包含一部分变更的许多个长久运作的分支。
 The biggest problem they run into is that many long running branches that each contain part of the changes are around.
-人们很难区分哪个分支是他们要开发的或者是部署到产品的。
+人们很难区分哪个分支是他们要开发的或者是部署到生产的。
 People have a hard time figuring out which branch they should develop on or deploy to production.
 经常反应这个问题的是采用如 [Git 流程](http://nvie.com/posts/a-successful-git-branching-model/)与 [GitHub 流程](http://scottchacon.com/2011/08/31/github-flow.html)的标准模式。
 Frequently the reaction to this problem is to adopt a standardized pattern such as [git flow](http://nvie.com/posts/a-successful-git-branching-model/) and [GitHub flow](http://scottchacon.com/2011/08/31/github-flow.html)
@@ -87,7 +91,7 @@ It advocates a master branch and a separate develop branch as well as supporting
 The development happens on the develop branch, moves to a release branch and is finally merged into the master branch.
 Git 流程是一个明确定义的标准，但是它的复杂性引入两个问题。
 Git flow is a well defined standard but its complexity introduces two problems.
-第一个问题是：开发人员必需使用开发分支，而不是主分支，主分支预留给已发布到产品的代码。
+第一个问题是：开发人员必需使用开发分支，而不是主分支，主分支预留给已发布到生产的代码。
 The first problem is that developers must use the develop branch and not master, master is reserved for code that is released to production.
 有个惯例：称呼你的默认分支为主分支，通常从这分支，并且合并到这。
 It is a convention to call your default branch master and to mostly branch from and merge to this.
@@ -131,11 +135,11 @@ But this flow still leaves a lot of questions unanswered regarding deployments, 
 通过 GitLab 流程，我们提供这些问题的额外指导。
 With GitLab flow we offer additional guidance for these questions.
 
-# GitLab 流程的产品分支 Production branch with GitLab flow
+# GitLab 流程的生产分支 Production branch with GitLab flow
 
-![主分支与箭头指示部署的产品分支](production_branch.png)
+![主分支与箭头指示部署的生产分支](production_branch.png)
 
-GitHub 流程确实假定每次你合并一个特征分支时你可以部署到产品。
+GitHub 流程确实假定每次你合并一个特征分支时你可以部署到生产。
 GitHub flow does assume you are able to deploy to production every time you merge a feature branch.
 这适合给软件即服务（Saas）的应用，但是这不适合很多种情况。
 This is possible for SaaS applications but are many cases where this is not possible.
@@ -143,15 +147,15 @@ This is possible for SaaS applications but are many cases where this is not poss
 One would be a situation where you are not in control of the exact release moment, for example an iOS application that needs to pass AppStore validation.
 另一个例子是你有部署窗口（运作团队全负荷工作、上午10点到下午4点的工作日），但是你也在其它时间内合并代码。
 Another example is when you have deployment windows (workdays from 10am to 4pm when the operations team is at full capacity) but you also merge code at other times.
-在这些情况下，你可以使得产品分支反映已部署的代码。
+在这些情况下，你可以使得生产分支反映已部署的代码。
 In these cases you can make a production branch that reflects the deployed code.
-你可以部署一个合并到主分支的新版本到产品分支。
+你可以部署一个合并到主分支的新版本到生产分支。
 You can deploy a new version by merging in master to the production branch.
-如果你需要知道哪些代码在产品中，你只需签出产品分支来看。
+如果你需要知道哪些代码在生产中，你只需签出生产分支来看。
 If you need to know what code is in production you can just checkout the production branch to see.
 作为版本控制系统中的合并提交，近似的部署时间很容易看到。
 The approximate time of deployment is easily visible as the merge commit in the version control system.
-如果你自动部署你的产品分支，这个时间相当精确。
+如果你自动部署你的生产分支，这个时间相当精确。
 This time is pretty accurate if you automatically deploy your production branch.
 如果你需要更精确的时间，你可以在每次部署时使用你的部署代码创建一个标签。
 If you need a more exact time you can have your deployment script create a tag on each deployment.
@@ -166,9 +170,9 @@ This flow prevents the overhead of releasing, tagging and merging that is common
 It might be a good idea to have an environment that is automatically updated to the master branch.
 只有在这种情况下，这个环境名可能与分支名不同。
 Only in this case, the name of this environment might differ from the branch name.
-假设你有一个临时环境、一个预生产环境与一个生产环境。
+假设你有一个准生产环境、一个预生产环境与一个生产环境。
 Suppose you have a staging environment, a pre-production environment and a production environment.
-在这种情况下，主分支部署在临时环境。当有人想要部署到预生产环境，他们从主分支创建一个合并请求到预生产分支。
+在这种情况下，主分支部署在准生产环境。当有人想要部署到预生产环境，他们从主分支创建一个合并请求到预生产分支。
 In this case the master branch is deployed on staging. When someone wants to deploy to pre-production they create a merge request from the master branch to the pre-production branch.
 然后继续通过合并预生产分支到生产分支来代码生产。
 And going live with code happens by merging the pre-production branch into the production branch.
@@ -207,7 +211,7 @@ This is called an 'upstream first' policy that is also practiced by [Google](htt
 Every time a bug-fix is included in a release branch the patch version is raised (to comply with [Semantic Versioning](http://semver.org/)) by setting a new tag.
 一些项目也有一个指向同样提交的稳定分支作为最新发布分支。
 Some projects also have a stable branch that points to the same commit as the latest released branch.
-在这种流程中，通常不会有一个产品分支（或者 Git 流程的主分支）。
+在这种流程中，通常不会有一个生产分支（或者 Git 流程的主分支）。
 In this flow it is not common to have a production branch (or git flow master branch).
 
 # GitLab 流程的合并/拉取请求 Merge/pull requests with GitLab flow
@@ -259,11 +263,11 @@ So if you want to merge it into a protected branch you assign it to someone with
 GitLab 流程是一个使得代码与问题跟踪关联更透明的方法。
 GitLab flow is a way to make the relation between the code and the issue tracker more transparent.
 
-任何重大的代码更改应该以一个描述目的的问题开始。
+任何重大的代码变更应该以一个描述目的的问题开始。
 Any significant change to the code should start with an issue where the goal is described.
-对通知团队中每个成员与帮助人们保持特征分支的范围小，有每次代码更改的理由是重要的。
+对通知团队中每个成员与帮助人们保持特征分支的范围小，有每次代码变更的理由是重要的。
 Having a reason for every code change is important to inform everyone on the team and to help people keep the scope of a feature branch small.
-在 GitLab 中，每次代码库的更改从问题跟踪系统的一个问题开始。
+在 GitLab 中，每次代码库的变更从问题跟踪系统的一个问题开始。
 In GitLab each change to the codebase starts with an issue in the issue tracking system.
 假如有重大的工作（大于 1 个小时）将卷入，如果还没有问题，应该先创建它。
 If there is no issue yet it should be created first provided there is significant work involved (more than 1 hour).
@@ -272,41 +276,64 @@ For many organizations this will be natural since the issue will have to be esti
 问题的标题应该描述系统的状态，例如，“作为管理员，我想没有收到错误地移除用户。”代替“管理员无法移除用户。”。
 Issue titles should describe the desired state of the system, e.g. "As an administrator I want to remove users without receiving an error" instead of "Admin can't remove users.".
 
+当你准备编写代码时，你从主分支开始一个问题的分支。
 When you are ready to code you start a branch for the issue from the master branch.
+分支名应该以问题编号开头，例如“15-require-a-password-to-change-it”。
 The name of this branch should start with the issue number, for example '15-require-a-password-to-change-it'.
 
+当你完成时或者想讨论代码时，你打开一个合并请求。
 When you are done or want to discuss the code you open a merge request.
+这是一个给讨论变变更与审查代码的在线地方。
 This is an online place to discuss the change and review the code.
+因为你并不总是想要合并你新推送的分支，创建一个分支是手动操作，它可能是一个长期的环境或者发布分支。
 Creating a branch is a manual action since you do not always want to merge a new branch you push, it could be a long-running environment or release branch.
+如果你创建一个合并请求但没有指派给任何人，它是一个“半成品”的合并请求。
 If you create the merge request but do not assign it to anyone it is a 'work-in-process' merge request.
+这被用来讨论提出的实现，但仍然没未准备好包含到主分支中。
 These are used to discuss the proposed implementation but are not ready for inclusion in the master branch yet.
 
+当作者认为代码准备好，将合并请求指派给审查员。
 When the author thinks the code is ready the merge request is assigned to reviewer.
+当审查员认为代码已准备好包含到主分支中，他们点击合并按钮。
 The reviewer presses the merge button when they think the code is ready for inclusion in the master branch.
+这种情况下代码已合并，并且将创建一个合并提交使得后来容易看到这个事件。
 In this case the code is merged and a merge commit is generated that makes this event easily visible later on.
+即使一个提交也没有增加， 合并请求总是创建一个合并提交。
 Merge requests always create a merge commit even when the commit could be added without one.
+在 Git 中这种合并策略称为“无快进（no fast-forward）”。
 This merge strategy is called 'no fast-forward' in git.
+然后，因已合并的特征分支不再需要，删除它，在 GitLab 中当合并时这个操作有个选项。
 After the merge the feature branch is deleted since it is no longer needed, in GitLab this deletion is an option when merging.
 
+假设一个分支已合并但是出现一个问题，然后重新打开该问题。
 Suppose that a branch is merged but a problem occurs and the issue is reopened.
+在这种情况下，重用相同的分支名没有问题，因为分支合并时它已删除。
 In this case it is no problem to reuse the same branch name since it was deleted when the branch was merged.
+任何时候，每个问题最多一个分支。
 At any time there is at most one branch for every issue.
+一个特征分支解决不止一个问题是可能的。
 It is possible that one feature branch solves more than one issue.
 
-# Linking and closing issues from merge requests
+# 从合并请求中链接与关闭问题  Linking and closing issues from merge requests
 
-![Merge request showing the linked issues that will be closed](close_issue_mr.png)
+![显示已链接的问题将被关闭的合并请求](close_issue_mr.png)
 
+通过在提交消息或合并请求描述中提及他们（fixes #14、closes #67、等等），可以链接到问题。
 Linking to the issue can happen by mentioning them from commit messages (fixes #14, closes #67, etc.) or from the merge request description.
+在 GitLab 中，这将在问题中创建一条合并请求提交该问题的评论。
 In GitLab this creates a comment in the issue that the merge requests mentions the issue.
+并且合并请求显示已链接的问题。
 And the merge request shows the linked issues.
+当合并代码到默认分支时，这些问题将被关闭。
 These issues are closed once code is merged into the default branch.
 
+如果你只想创建一个引用而没有关闭问题，你也可以只提及它：“首选鸭子类型。#12”。
 If you only want to make the reference without closing the issue you can also just mention it: "Ducktyping is preferred. #12".
 
+如果你有一个问题跨越多个仓库，最好的办法是给每个仓库创建一个问题并且链接所有的问题到一个父问题。
 If you have an issue that spans across multiple repositories, the best thing is to create an issue for each repository and link all issues to a parent issue.
 
-# Squashing commits with rebase
+# 使用衍合压缩提交 Squashing commits with rebase
 
 ![Vim screen showing the rebase view](rebase.png)
 
