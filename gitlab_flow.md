@@ -178,7 +178,7 @@ In this case the master branch is deployed on staging. When someone wants to dep
 And going live with code happens by merging the pre-production branch into the production branch.
 这个提交只能向下流动的工作流程确保任何东西已在所有环境中测试。
 This workflow where commits only flow downstream ensures that everything has been tested on all environments.
-如果你需要择优选择一个含补丁的提交，它通常在一个特征分支上开发，然后通过一个合并请求合并到主分支中，不删除特征分支。
+如果你需要择优筛选一个含补丁的提交，它通常在一个特征分支上开发，然后通过一个合并请求合并到主分支中，不删除特征分支。
 If you need to cherry-pick a commit with a hotfix it is common to develop it on a feature branch and merge it into master with a merge request, do not delete the feature branch.
 如果主分支准备好了（如果你是实践[持续交付](http://martinfowler.com/bliki/ContinuousDelivery.html)，它应该是好的），然后合并它到其它分支。
 If master is good to go (it should be if you a practicing [continuous delivery](http://martinfowler.com/bliki/ContinuousDelivery.html)) you then merge it to the other branches.
@@ -201,9 +201,9 @@ The stable branch uses master as a starting point and is created as late as poss
 By branching as late as possible you minimize the time you have to apply bugfixes to multiple branches.
 一个发布分支宣布以后，只有严重的错误修正才会包含在发布分支中。
 After a release branch is announced, only serious bug fixes are included in the release branch.
-如果可能的话，这些错误修正先合并到主分支，再择优选择它们到发布分支。
+如果可能的话，这些错误修正先合并到主分支，再择优筛选它们到发布分支。
 If possible these bug fixes are first merged into master and then cherry-picked into the release branch.
-这样，你不会忘记优选择它们到主分支，也不会在随后的发布中遭遇同一的bug。
+这样，你不会忘记择优筛选它们到主分支，也不会在随后的发布中遭遇同一的bug。
 This way you can't forget to cherry-pick them into master and encounter the same bug on subsequent releases.
 这称为一种“上游优先”的策略，同样也被 [Google](http://www.chromium.org/chromium-os/chromiumos-design-docs/upstream-first) and [Red Hat](http://www.redhat.com/about/news/archive/2013/5/a-community-for-using-openstack-with-red-hat-rdo) 实践。
 This is called an 'upstream first' policy that is also practiced by [Google](http://www.chromium.org/chromium-os/chromiumos-design-docs/upstream-first) and [Red Hat](http://www.redhat.com/about/news/archive/2013/5/a-community-for-using-openstack-with-red-hat-rdo).
@@ -335,31 +335,49 @@ If you have an issue that spans across multiple repositories, the best thing is 
 
 # 使用衍合压缩提交 Squashing commits with rebase
 
-![Vim screen showing the rebase view](rebase.png)
+![Vim 屏幕显示衍合视图](rebase.png)
 
+使用 Git，你可以用一个交互式衍合（rebase -i）来压缩多个提交成一个提交，并重新排列他们。
 With git you can use an interactive rebase (rebase -i) to squash multiple commits into one and reorder them.
+如果你在开发中完成了两三个小更改的提交并且想替换它们为单个提交，或者你想让次序更合理，这个功能是有用的。
 This functionality is useful if you made a couple of commits for small changes during development and want to replace them with a single commit or if you want to make the order more logical.
+然而，你永远不应该衍合那些已推送到远端服务器的提交。
 However you should never rebase commits you have pushed to a remote server.
+有人可能已经引用那些提交，或者已经择优筛选它们。
 Somebody can have referred to the commits or cherry-picked them.
+当你衍合时你更改了提交的标识符（SHA1），这是混乱的。
 When you rebase you change the identifier (SHA1) of the commit and this is confusing.
+如果你那样做，同样的变更将被当作多个标识符，然后这会引起很大的混合。
 If you do that the same change will be known under multiple identifiers and this can cause much confusion.
+如果有人已经审查了你的代码，因你已经把所有的提交衍合为一个提交，他们将很难只审查你改进的地方。
 If people already reviewed your code it will be hard for them to review only the improvements you made since then if you have rebased everything into one commit.
 
+鼓励人们经常提交与频繁推送到远端仓库，所以，其他人了解每个人在做什么。
 People are encouraged to commit often and to frequently push to the remote repository so other people are aware what everyone is working on.
+这将导致每个变更有很多个提交，使得很难理解历史日志。
 This will lead to many commits per change which makes the history harder to understand.
+但是，有固定标识符的优点大于这个缺点。
 But the advantages of having stable identifiers outweigh this drawback.
+并且要理解内容中的一次变更，人们总是可以看合并提交——当合并代码到主分支时组织所有的提交到一起。
 And to understand a change in context one can always look at the merge commit that groups all the commits together when the code is merged into the master branch.
 
+你从特征分支合并多个提交到主分支后，这更难取消。
 After you merge multiple commits from a feature branch into the master branch this is harder to undo.
+如果你可能会压缩所有的提交到一个提交，你应该只恢复本次提交，但是，像我们指出你不应该在推送提交之后衍合它们。
 If you would have squashed all the commits into one you could have just reverted this commit but as we indicated you should not rebase commits after they are pushed.
+幸运地，[恢复一段时间以前的合并](http://git-scm.com/blog/2010/03/02/undoing-merges.html)可以由 Git 完成。
 Fortunately [reverting a merge made some time ago](http://git-scm.com/blog/2010/03/02/undoing-merges.html) can be done with git.
+但是，这需要有详细的合并提交给那些你想恢复的提交。
 This however, requires having specific merge commits for the commits your want to revert.
+如果你恢复一个合并然后你改变主意了，恢复那个恢复代替再次合并，因为另外 Git 不允许再次合并代码。
 If you revert a merge and you change your mind, revert the revert instead of merging again since git will not allow you to merge the code again otherwise.
 
+要能够恢复一个合并是个好理由在你手动合并时使用`--no-ff`选项创建一个合并提交。
 Being able to revert a merge is a good reason always to create a merge commit when you merge manually with the `--no-ff` option.
+在你接受一个合并请求时，Git 管理软件将总是创建一个合并提交。
 Git management software will always create a merge commit when you accept a merge request.
 
-# Do not order commits with rebase
+# 不要使用衍合排列提交 Do not order commits with rebase
 
 ![List of sequential merge commits](merge_commits.png)
 
